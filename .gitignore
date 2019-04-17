@@ -59,3 +59,7 @@ typings/
 
 # next.js build output
 .next
+
+#Users list
+usersList.json
+keywordsList.json
