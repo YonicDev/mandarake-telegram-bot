@@ -368,7 +368,7 @@ function searchTask(user_id,task_index) {
                 }
             }
         }
-        if(items!=undefined && items.entryCount > 0) {
+        if(items!=undefined && (items.entryCount > 0 || items.entries.length > 0)) {
             user.search_results.entries = items.entries;
             user.search_results.count = items.entryCount;
             user.is_performing_manual_search = false;
@@ -440,17 +440,24 @@ function searchBulk(user_id) {
             }
             user.search_results = results;
             user.is_performing_manual_search = false;
-            bot.sendMessage(user_id,`I've found ${user.search_results.count} items available to buy!\n(Will display only results added in 7 days)`).then(() => {
-                var entry = user.search_results.entries[0];
-                var options = getPagination(1,user.search_results.count);
-                options.caption = `<b>Title</b>: ${entry.title}\n<b>Shop</b>: ${entry.shop}\n<b>Price</b>:${entry.price}\u00A5\n${entry.isAdult?"<b>This is an R-18 doujinshi.</b>":"This is not an adult doujinshi."}\n\n${entry.isStorefront?"<b>This is a storefront item. Be careful when ordering!</b>\n\n":""}<b>Link</b>: ${entry.link}`;
-                options.parse_mode = "HTML";
-                bot.sendPhoto(user_id,entry.image,options).catch((err) => {
-                    console.warn(err.message);
-                    options.caption = `<i>The title could not be displayed.</i>\n<b>Price</b>:${entry.price}\u00A5\n${entry.isAdult?"<b>This is an R-18 doujinshi.</b>":"This is not an adult doujinshi."}\n\n${entry.isStorefront?"<b>This is a storefront item. Be careful when ordering!</b>\n\n":""}<b>Link</b>: ${entry.link}`
-                    bot.sendPhoto(user.id,entry.image,options);
+            if(users.search_results.count>0||users.search_results.entries.length>0) {
+                bot.sendMessage(user_id,`I've found ${user.search_results.count} items available to buy!\n(Will display only results added in 7 days)`).then(() => {
+                    var entry = user.search_results.entries[0];
+                    var options = getPagination(1,user.search_results.count);
+                    options.caption = `<b>Title</b>: ${entry.title}\n<b>Shop</b>: ${entry.shop}\n<b>Price</b>:${entry.price}\u00A5\n${entry.isAdult?"<b>This is an R-18 doujinshi.</b>":"This is not an adult doujinshi."}\n\n${entry.isStorefront?"<b>This is a storefront item. Be careful when ordering!</b>\n\n":""}<b>Link</b>: ${entry.link}`;
+                    options.parse_mode = "HTML";
+                    bot.sendPhoto(user_id,entry.image,options).catch((err) => {
+                        console.warn(err.message);
+                        options.caption = `<i>The title could not be displayed.</i>\n<b>Price</b>:${entry.price}\u00A5\n${entry.isAdult?"<b>This is an R-18 doujinshi.</b>":"This is not an adult doujinshi."}\n\n${entry.isStorefront?"<b>This is a storefront item. Be careful when ordering!</b>\n\n":""}<b>Link</b>: ${entry.link}`
+                        bot.sendPhoto(user.id,entry.image,options);
+                    });
                 });
-            });
+            } else if(user.is_performing_manual_search) {
+                bot.sendMessage(user_id,`I've found some items, but all of the items listed have been blacklisted.\n\nI only display items that have been added within 7 days, so make sure you check Mandarake anyways! https://order.mandarake.co.jp/`).then(function() {
+                    user.is_performing_manual_search = false;
+                });
+
+            }
         } else if(user.is_performing_manual_search) {
             bot.sendMessage(user_id,`Sorry, I haven't found any recent additions!\n\nI only display items that have been added within 7 days, so make sure you check Mandarake anyways! https://order.mandarake.co.jp/}`).then(function() {
                 user.is_performing_manual_search = false;
