@@ -42,7 +42,7 @@ bot.onText(/\/start/, function(message) {
         is_adult: false
     }
     saveUsersList();
-    bot.sendMessage(message.from.id,`Hello, ${message.from.first_name}! This is @Yonic_Soseki's Mandarake bot!\nThis bot automatically checks every 10 minutes if any doujinshi items you want.\nYou can get started with /taskstart.`).catch((e) => {
+    bot.sendMessage(message.from.id,`Hello, ${message.from.first_name}! This is Yonic and Iwanko's Mandarake bot!\nThis bot automatically checks every 10 minutes if any doujinshi items you want.\nYou can get started with /taskstart.`).catch((e) => {
         console.log(e);
     });
 })
@@ -368,7 +368,7 @@ function searchTask(user_id,task_index) {
                 }
             }
         }
-        if(items!=undefined && (items.entryCount > 0 || items.entries.length > 0)) {
+        if(items!=undefined && items.entryCount > 0 && items.entries.length > 0) {
             user.search_results.entries = items.entries;
             user.search_results.count = items.entryCount;
             user.is_performing_manual_search = false;
@@ -439,8 +439,7 @@ function searchBulk(user_id) {
                 }
             }
             user.search_results = results;
-            user.is_performing_manual_search = false;
-            if(users.search_results.count>0||users.search_results.entries.length>0) {
+            if(user.search_results.count>0&&users.search_results.entries.length>0) {
                 bot.sendMessage(user_id,`I've found ${user.search_results.count} items available to buy!\n(Will display only results added in 7 days)`).then(() => {
                     var entry = user.search_results.entries[0];
                     var options = getPagination(1,user.search_results.count);
@@ -451,6 +450,8 @@ function searchBulk(user_id) {
                         options.caption = `<i>The title could not be displayed.</i>\n<b>Price</b>:${entry.price}\u00A5\n${entry.isAdult?"<b>This is an R-18 doujinshi.</b>":"This is not an adult doujinshi."}\n\n${entry.isStorefront?"<b>This is a storefront item. Be careful when ordering!</b>\n\n":""}<b>Link</b>: ${entry.link}`
                         bot.sendPhoto(user.id,entry.image,options);
                     });
+                }).finally(() => {
+                    user.is_performing_manual_search = false;
                 });
             } else if(user.is_performing_manual_search) {
                 bot.sendMessage(user_id,`I've found some items, but all of the items listed have been blacklisted.\n\nI only display items that have been added within 7 days, so make sure you check Mandarake anyways! https://order.mandarake.co.jp/`).then(function() {
