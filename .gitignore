@@ -63,3 +63,4 @@ typings/
 #Users list
 usersList.json
 keywordsList.json
+serverStatus.json

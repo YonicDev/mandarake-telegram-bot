@@ -10,6 +10,8 @@ const removeHTML = require('striptags');
 const token = process.env.MANDARAKE_BOT_KEY;
 const bot = new TelegramBot(token,{polling:true});
 
+const BOT_VERSION = require("./package.json").version;
+
 var users;
 fs.readFile("./usersList.json",(err,data) => {
     if(err) {
@@ -30,6 +32,28 @@ fs.readFile("./usersList.json",(err,data) => {
         }
     } else {
         users = JSON.parse(data);
+    }
+})
+var underMaintenance;
+fs.readFile("./serverStatus.json",(err,data) => {
+    if(err) {
+        if(err.code =="ENOENT") {
+            users = {};
+            console.log("serverStatus.json not found, creating one...")
+            fs.writeFile("./serverStatus.json",JSON.stringify({maintenance:false}),(err,data) => {
+                if(err) {
+                    console.error("[CRASH!]: Error writing file serverStatus.json.")
+                    console.error(err);
+                    process.exit(1);
+                }
+            });
+        } else {
+            console.error("[CRASH!]: Could not read serverStatus.json!")
+            console.error(err);
+            process.exit(1);
+        }
+    } else {
+        underMaintenance = JSON.parse(data).maintenance;
     }
 })
 
@@ -57,17 +81,36 @@ bot.onText(/\/start/, function(message) {
     } catch(e) {
         oops(message.from.id,e);
     }
-    saveUsersList();
-    bot.sendMessage(message.from.id,`Hello, ${message.from.first_name}! This is Yonic and Iwanko's Mandarake bot!\nThis bot automatically checks every 10 minutes if any doujinshi items you want.\nYou can get started with /taskstart.`).catch((e) => {
-        console.log(e);
-    });
 })
 
-bot.onText(/\/taskstart/, function(message) {
-    bot.sendMessage(message.from.id,"Please write your search query for the task.").then(function() {
-        users[message.from.id].is_adding_task = true;
-    });
-})
+function addTask(message,matches) {
+    if(users[message.from.id]!=undefined) {
+        if(matches[1]) {
+            if(!/[^/\s]+/.test(matches[1])) {
+                if(users[message.from.id].tasks.indexOf(matches[1])<0) {
+                    users[message.from.id].tasks.push(matches[1]);
+                    bot.sendMessage(message.from.id,"Your task has been added!").then(function() {
+                        users[message.from.id].is_adding_task = false;
+                        saveUsersList();
+                    }).catch(function(error) { oops(message.from.id,error) });
+                } else {
+                    bot.sendMessage(message.from.id,"That task is already on the list! Try again.");
+                }
+            } else {
+                bot.sendMessage(message.from.id,"You can only use one non-command line to put your query. Try again.");
+            }
+        } else {
+            bot.sendMessage(message.from.id,"Please write your search query for the task.").then(function() {
+                    users[message.from.id].is_adding_task = true;
+            }).catch(function(err) { oops(message.from.id,err)});
+        }
+    } else {
+        bot.sendMessage(message.from.id,"You need to setup your account first! Use /start to do so.");
+    }
+}
+
+bot.onText(/\/taskstart ?(.*)/u, function(message,matches) {addTask(message,matches)});
+bot.onText(/\/taskadd ?(.*)/u, function(message,matches) {addTask(message,matches)});
 
 bot.onText(/\/tasklist/, function(message) {
     var text;
@@ -262,6 +305,26 @@ bot.onText(/\/im18yearsoldpleaseshowmehentai/, function(message) {
         bot.sendMessage(message.from.id,"You need to setup your account first! Use /start to do so.")
     }
 })
+
+bot.onText(/\/about/,function(message) {
+    bot.sendMessage(message.from.id,`Mandarake Watcher\nVersion ${BOT_VERSION}\nMIT License 2019\nBy Yonic Soseki and Iwanko\n\n${underMaintenance?"<b>The bot is under maintenance! Some stuff might not work properly!</b>":""}`,{parse_mode:"HTML"});
+})
+
+bot.onText(/\/maintenance (on|off)/,function(message,matches) {
+    try {
+        fs.writeFile("./serverStatus.json", JSON.stringify({maintenance:matches[1]==="on"}), function(err) {
+            if (err) {
+                console.log(err);
+            } else {
+                underMaintenance = matches[1]==="on";
+                for(user in users) {
+                    bot.sendMessage(user,matches[1]==="on"?"This bot is going under maintenance! Usage of the bot is discouraged as it will probably not work!":"Maintenance is over! You may use the bot as normal.").catch(function(e){console.error(e)});
+                }
+            }
+        });
+    } catch(e){
+        console.err(e);
+    }
 })
 
 bot.on('message',function(message) {
