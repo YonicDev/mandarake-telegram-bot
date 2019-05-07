@@ -75,9 +75,7 @@ bot.onText(/\/start/, function(message) {
             is_adult: false
         }
         saveUsersList();
-        bot.sendMessage(message.from.id,`Hello, ${message.from.first_name}! This is Yonic and Iwanko's Mandarake bot!\nThis bot automatically checks every 10 minutes if any doujinshi items you want.\nYou can get started with /taskstart.`).catch(function(err) {
-            console.error(err);
-        });
+        bot.sendMessage(message.from.id,`Hello, ${message.from.first_name}! This is Yonic and Iwanko's Mandarake bot!\nThis bot automatically checks every 10 minutes if any doujinshi items you want.\nYou can get started with /taskstart.${underMaintenance?"\n\n<b>The bot is currently under maintenance! Some functions may not work properly!</b>":''}`,{parse_mode:"HTML"}).catch(messageHandler);
     } catch(e) {
         oops(message.from.id,e);
     }
