@@ -439,7 +439,7 @@ bot.on('callback_query',function(callbackQuery) {
         var image = {
             type:"photo",
             media:entry.image,
-            caption: `${entry.title!=undefined?"<b>Title</b>: "+entry.title:"<i>The title could not be displayed.</i>"}\n<b>Shop</b>: ${entry.shop!=undefined?entry.shop:"Unavailable"}\n<b>Price</b>:${entry.price!=undefined+"\u00A5"?entry.price:"Unavailable"}\n${entry.isAdult!=undefined?(entry.isAdult?"<b>This is an R-18 doujinshi.</b>":"This is not an adult doujinshi."):"Could not obtain information of age rating. Be careful when ordering!"}\n\n${entry.isStorefront?("<b>This is a storefront item. Be careful when ordering!</b>\n\n":""):"Could not obtain information of item's storefront availability."}<b>Link</b>: ${entry.link!=undefined?entry.link:"Cannot be provided!"}`,
+            caption: `${entry.title!=undefined?"<b>Title</b>: "+entry.title:"<i>The title could not be displayed.</i>"}\n<b>Shop</b>: ${entry.shop!=undefined?entry.shop:"Unavailable"}\n<b>Price</b>:${entry.price!=undefined?entry.price+"\u00A5":"Unavailable"}\n${entry.isAdult!=undefined?(entry.isAdult?"<b>This is an R-18 doujinshi.</b>":"This is not an adult doujinshi."):"Could not obtain information of age rating. Be careful when ordering!"}\n\n${entry.isStorefront!=undefined?(entry.isStorefront?"<b>This is a storefront item. Be careful when ordering!</b>\n\n":""):"Could not obtain information of item's storefront availability."}<b>Link</b>: ${entry.link!=undefined?entry.link:"Cannot be provided!"}`,
             parse_mode:"HTML"
         };
 
@@ -468,7 +468,7 @@ bot.on('callback_query',function(callbackQuery) {
             var image = {
                 type:"photo",
                 media:entry.image,
-                caption: `${entry.title!=undefined?"<b>Title</b>: "+entry.title:"<i>The title could not be displayed.</i>"}\n<b>Shop</b>: ${entry.shop!=undefined?entry.shop:"Unavailable"}\n<b>Price</b>:${entry.price!=undefined+"\u00A5"?entry.price:"Unavailable"}\n${entry.isAdult!=undefined?(entry.isAdult?"<b>This is an R-18 doujinshi.</b>":"This is not an adult doujinshi."):"Could not obtain information of age rating. Be careful when ordering!"}\n\n${entry.isStorefront?("<b>This is a storefront item. Be careful when ordering!</b>\n\n":""):"Could not obtain information of item's storefront availability."}<b>Link</b>: ${entry.link!=undefined?entry.link:"Cannot be provided!"}`,
+                caption: `${entry.title!=undefined?"<b>Title</b>: "+entry.title:"<i>The title could not be displayed.</i>"}\n<b>Shop</b>: ${entry.shop!=undefined?entry.shop:"Unavailable"}\n<b>Price</b>:${entry.price!=undefined?entry.price+"\u00A5":"Unavailable"}\n${entry.isAdult!=undefined?(entry.isAdult?"<b>This is an R-18 doujinshi.</b>":"This is not an adult doujinshi."):"Could not obtain information of age rating. Be careful when ordering!"}\n\n${entry.isStorefront!=undefined?(entry.isStorefront?"<b>This is a storefront item. Be careful when ordering!</b>\n\n":""):"Could not obtain information of item's storefront availability."}<b>Link</b>: ${entry.link!=undefined?entry.link:"Cannot be provided!"}`,
                 parse_mode:"HTML"
             };
             bot.editMessageMedia(image, editOptions).then(()=> {bot.answerCallbackQuery(callbackQuery.id)},(err) => {
@@ -513,7 +513,7 @@ function searchTask(user_id,task_index) {
             bot.sendMessage(user_id,`I've found ${user.search_results.count} items available to buy!\n(Will display only results added in 7 days)`).then(() => {
                 var entry = user.search_results.entries[0];
                 var options = getPagination(1,user.search_results.count);
-                caption: `${entry.title!=undefined?"<b>Title</b>: "+entry.title:"<i>The title could not be displayed.</i>"}\n<b>Shop</b>: ${entry.shop!=undefined?entry.shop:"Unavailable"}\n<b>Price</b>:${entry.price!=undefined+"\u00A5"?entry.price:"Unavailable"}\n${entry.isAdult!=undefined?(entry.isAdult?"<b>This is an R-18 doujinshi.</b>":"This is not an adult doujinshi."):"Could not obtain information of age rating. Be careful when ordering!"}\n\n${entry.isStorefront?("<b>This is a storefront item. Be careful when ordering!</b>\n\n":""):"Could not obtain information of item's storefront availability."}<b>Link</b>: ${entry.link!=undefined?entry.link:"Cannot be provided!"}`,
+                caption: `${entry.title!=undefined?"<b>Title</b>: "+entry.title:"<i>The title could not be displayed.</i>"}\n<b>Shop</b>: ${entry.shop!=undefined?entry.shop:"Unavailable"}\n<b>Price</b>:${entry.price!=undefined?entry.price+"\u00A5":"Unavailable"}\n${entry.isAdult!=undefined?(entry.isAdult?"<b>This is an R-18 doujinshi.</b>":"This is not an adult doujinshi."):"Could not obtain information of age rating. Be careful when ordering!"}\n\n${entry.isStorefront!=undefined?(entry.isStorefront?"<b>This is a storefront item. Be careful when ordering!</b>\n\n":""):"Could not obtain information of item's storefront availability."}<b>Link</b>: ${entry.link!=undefined?entry.link:"Cannot be provided!"}`,
                 options.parse_mode = "HTML";
                 bot.sendPhoto(user_id,entry.image,options).catch(function(err) {oops(user_id,err)});
             },messageHandler).catch(function(err) {oops(user_id,err)});
