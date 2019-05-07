@@ -505,7 +505,7 @@ function searchTask(user_id,task_index) {
         if(user.blacklist!=undefined&&user.blacklist.length>0) {
             for(var entry in items.entries) {
                 for(var black in user.blacklist) {
-                    if(items.entries[entry].title[0] === user.blacklist[black]) {
+                    if(items.entries[entry].title === user.blacklist[black]) {
                         items.entries.splice(entry,1);
                         items.entryCount--;
                     }
@@ -569,7 +569,7 @@ function searchBulk(user_id) {
             if(user.blacklist!=undefined&&user.blacklist.length>0) {
                 for(var entry in results.entries) {
                     for(var black in user.blacklist) {
-                        if(results.entries[entry].title[0] === user.blacklist[black]) {
+                        if(results.entries[entry].title === user.blacklist[black]) {
                             results.entries.splice(entry,1);
                             results.count--;
                         }
