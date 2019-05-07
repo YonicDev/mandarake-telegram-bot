@@ -86,26 +86,26 @@ bot.onText(/\/start/, function(message) {
 function addTask(message,matches) {
     if(users[message.from.id]!=undefined) {
         if(matches[1]) {
-            if(!/[^/\s]+/.test(matches[1])) {
+            if(!/\//.test(matches[1])) {
                 if(users[message.from.id].tasks.indexOf(matches[1])<0) {
                     users[message.from.id].tasks.push(matches[1]);
                     bot.sendMessage(message.from.id,"Your task has been added!").then(function() {
                         users[message.from.id].is_adding_task = false;
                         saveUsersList();
-                    }).catch(function(error) { oops(message.from.id,error) });
+                    },messageHandler).catch(function(error) { oops(message.from.id,error) });
                 } else {
-                    bot.sendMessage(message.from.id,"That task is already on the list! Try again.");
+                    bot.sendMessage(message.from.id,"That task is already on the list! Try again.").catch(messageHandler);
                 }
             } else {
-                bot.sendMessage(message.from.id,"You can only use one non-command line to put your query. Try again.");
+                bot.sendMessage(message.from.id,"You can only use one non-command line to put your query. Try again.").catch(messageHandler);
             }
         } else {
             bot.sendMessage(message.from.id,"Please write your search query for the task.").then(function() {
                     users[message.from.id].is_adding_task = true;
-            }).catch(function(err) { oops(message.from.id,err)});
+            },messageHandler).catch(function(err) { oops(message.from.id,err)});
         }
     } else {
-        bot.sendMessage(message.from.id,"You need to setup your account first! Use /start to do so.");
+        bot.sendMessage(message.from.id,"You need to setup your account first! Use /start to do so.").catch(messageHandler);
     }
 }
 
@@ -123,7 +123,11 @@ bot.onText(/\/tasklist/, function(message) {
     } else {
         text = "You have no tasks set. To add one, use /taskstart."
     }
-    bot.sendMessage(message.from.id,text);
+    bot.sendMessage(message.from.id,text).catch((err)=> {
+        if(errorChecker(err,403)) {
+            console.error(err);
+        }
+    });
 })
 
 bot.onText(/\/taskedit ?(\d*) ?(.*)/,function(message,matches) {
@@ -135,20 +139,20 @@ bot.onText(/\/taskedit ?(\d*) ?(.*)/,function(message,matches) {
                         bot.sendMessage(message.from.id,`Task succesfully edited!`).then(function() {
                             users[message.from.id].tasks[matches[1]] = matches[2];
                             saveUsersList();
-                        }).catch(function(e) { oops(message.from.id,e)});
+                        },messageHandler).catch(function(e) { oops(message.from.id,e)});
                     } else {
                         bot.sendMessage(message.from.id,`Type the new query you want to set.`).then(function() {
                             users[message.from.id].editing_task = parseInt(matches[1]);
-                        }).catch(function(e) { oops(message.from.id,e)});
+                        },messageHandler).catch(function(e) { oops(message.from.id,e)});
                     }
                 } else {
-                    bot.sendMessage(message.from.id,`Please, enter a valid number 0-${users[message.from.id].tasks.length-1}.`);
+                    bot.sendMessage(message.from.id,`Please, enter a valid number 0-${users[message.from.id].tasks.length-1}.`).catch(messageHandler);
                 }
             } else {
-                bot.sendMessage(message.from.id,`You don't have any tasks to edit. Add one with the /taskstart command.`);
+                bot.sendMessage(message.from.id,`You don't have any tasks to edit. Add one with the /taskstart command.`).catch(messageHandler);
             }
         } else {
-            bot.sendMessage(message.from.id,`You need to setup your account first! Use /start to do so.`);
+            bot.sendMessage(message.from.id,`You need to setup your account first! Use /start to do so.`).catch(messageHandler);
         }
     } else {
         //TODO: Make user choose between all tasks.
@@ -156,9 +160,7 @@ bot.onText(/\/taskedit ?(\d*) ?(.*)/,function(message,matches) {
         users[message.from.id].tasks.forEach(function (task, i) {
             text+=`${i}: ${task}\n`;
         })
-        bot.sendMessage(message.from.id,text).catch(function(err) {
-            console.error(err);
-        });
+        bot.sendMessage(message.from.id,text).catch(messageHandler);
     }
 })
 bot.onText(/\/taskdelete (\d+|all)/,function(message,matches) {
@@ -174,23 +176,23 @@ bot.onText(/\/taskdelete (\d+|all)/,function(message,matches) {
                 }
                 bot.sendMessage(message.from.id,`Are you sure you want to delete every task?`,settings).then(function() {
                     users[message.from.id].is_deleting_everything = true;
-                }).catch(function(error) { oops(message.from.id,error) });
+                },messageHandler).catch(function(error) { oops(message.from.id,error) });
             } else if(matches) {
                 var index = parseInt(matches[1]);
                     if(index>=0&&index<users[message.from.id].tasks.length) {
                     bot.sendMessage(message.from.id,`The task ${users[message.from.id].tasks[index]} has been deleted!`).then(function() {
                         users[message.from.id].tasks.splice(index,1);
                         saveUsersList();
-                    }).catch(function(error) { oops(message.from.id,error) });
+                    },messageHandler).catch(function(error) { oops(message.from.id,error) });
                 } else {
-                    bot.sendMessage(message.from.id,"You need to enter a valid task number to delete.");
+                    bot.sendMessage(message.from.id,"You need to enter a valid task number to delete.").catch(messageHandler);
                 }
             }
         } else {
-            bot.sendMessage(message.from.id,"You don't have any tasks to delete.");
+            bot.sendMessage(message.from.id,"You don't have any tasks to delete.").catch(messageHandler);
         }
     } else {
-        bot.sendMessage(message.from.id,"You need to setup your account first! Use /start to do so.");
+        bot.sendMessage(message.from.id,"You need to setup your account first! Use /start to do so.").catch(messageHandler);
     }
 })
 
@@ -201,7 +203,7 @@ bot.onText(/\/search ?(\d|all)?/,function(message,matches) {
                 users[message.from.id].is_performing_manual_search = true
                 bot.sendMessage(message.from.id,"Performing all tasks! Search results will be combined.").then(function() {
                     searchBulk(message.from.id);
-                }).catch(function(error) { oops(message.from.id,error) });
+                },messageHandler).catch(function(error) { oops(message.from.id,error) });
             } else if(matches[1]!=undefined) {
                 const options = {
                     reply_markup: {
@@ -210,7 +212,7 @@ bot.onText(/\/search ?(\d|all)?/,function(message,matches) {
                 };
                 bot.sendMessage(message.from.id,`Performing task #${matches[1]}`,options).then(function() {
                     searchTask(message.from.id,parseInt(matches[1]));
-                }).catch(function(error) { oops(message.from.id,error) });
+                },messageHandler).catch(function(error) { oops(message.from.id,error) });
             } else {
                 var i,j,chunk = 4; //TODO: Make chunk variable?
                 var buttons = [];
@@ -225,7 +227,7 @@ bot.onText(/\/search ?(\d|all)?/,function(message,matches) {
                 }
                 bot.sendMessage(message.from.id,`Choose the query to perform a search task from.\nKeep in mind that it will not interrupt the scheduled task.`,options).then(function() {
                     users[message.from.id].is_performing_manual_search = true
-                });
+                },messageHandler);
             }
         } else {
             bot.sendMessage(message.from.id,"You have no search tasks! Use /taskstart to add a new one.");
@@ -242,9 +244,9 @@ bot.onText(/\/blacklist$/,function(message) {
         for(index in blacklist) {
             text+=`${index}: ${blacklist[index]}\n`;
         }
-        bot.sendMessage(message.chat.id,text);
+        bot.sendMessage(message.chat.id,text).catch(messageHandler);
     } else {
-        bot.sendMessage(message.chat.id,"There is nothing in your blacklist.");
+        bot.sendMessage(message.chat.id,"There is nothing in your blacklist.").catch(messageHandler);
     }
 });
 bot.onText(/\/blacklistdelete (\d+|all)/,function(message,matches) {
@@ -258,12 +260,12 @@ bot.onText(/\/blacklistdelete (\d+|all)/,function(message,matches) {
         }
         bot.sendMessage(message.from.id,`Are you sure you want to delete every item in your blacklist?`,settings).then(function() {
             users[message.from.id].is_deleting_everything = true;
-        });
+        },messageHandler);
     } else {
         bot.sendMessage(message.from.id,`The item number ${matches[1]} has been deleted from your list!`).then(function() {
             users[message.from.id].blacklist.splice(parseInt(matches[1]),1);
             saveUsersList();
-        });
+        },messageHandler);
     }
 })
 
@@ -282,7 +284,7 @@ bot.onText(/\/lastsearch/,function(message) {
                         options.caption = `<i>The title could not be displayed.</i>\n<b>Price</b>:${entry.price}\u00A5\n${entry.isAdult?"<b>This is an R-18 doujinshi.</b>":"This is not an adult doujinshi."}\n\n${entry.isStorefront?"<b>This is a storefront item. Be careful when ordering!</b>\n\n":""}<b>Link</b>: ${entry.link}`
                         bot.sendPhoto(user.id,entry.image,options);
                     });
-                });
+                },messageHandler);
             } else if(user.search_results.task!=undefined&&user.search_results.task!="") {
                 bot.sendMessage(message.from.id,`Sorry, I haven't found any recent additions!\n\nI only display items that have been added within 7 days, so make sure you check Mandarake anyways! https://order.mandarake.co.jp/order/listPage/list?keyword=${user.search_results.task.replace(/ /,"_")}`);
             } else {
@@ -559,7 +561,6 @@ function searchBulk(user_id) {
             if(items!=undefined && items.entryCount > 0) {
                 results.entries = results.entries.concat(items.entries);
                 var obj = {};
-
                 for ( var i=0, len=results.entries.length; i < len; i++ )
                     obj[results.entries[i]['itemNo']] = results.entries[i];
 
@@ -570,6 +571,7 @@ function searchBulk(user_id) {
             }
         },(error)=> {Promise.reject(error)}).catch(function(error){Promise.reject(error)}));
     }
+    console.log("Searching...");
     Promise.all(promises).then(()=> {
         user.search_results.task = "bulk search";
         if(results!=undefined && results.count > 0) {
@@ -593,25 +595,31 @@ function searchBulk(user_id) {
                     bot.sendPhoto(user_id,entry.image,options).catch((err) => {
                         console.warn(err.message);
                         options.caption = `<i>The title could not be displayed.</i>\n<b>Price</b>:${entry.price}\u00A5\n${entry.isAdult?"<b>This is an R-18 doujinshi.</b>":"This is not an adult doujinshi."}\n\n${entry.isStorefront?"<b>This is a storefront item. Be careful when ordering!</b>\n\n":""}<b>Link</b>: ${entry.link}`
-                        bot.sendPhoto(user.id,entry.image,options);
-                    });
-                }).finally(() => {
+                        bot.sendPhoto(user.id,entry.image,options).catch((err)=>oops(user_id,err));
+                    },photoHandler).catch((err)=>oops(user_id,err));
+                },messageHandler).then(() => {
+                    user.is_performing_manual_search = false;
+                },(error) => {
+                    oops(user_id,error)
                     user.is_performing_manual_search = false;
                 });
             } else if(user.is_performing_manual_search) {
                 bot.sendMessage(user_id,`I've found some items, but all of the items listed have been blacklisted.\n\nI only display items that have been added within 7 days, so make sure you check Mandarake anyways! https://order.mandarake.co.jp/`).then(function() {
                     user.is_performing_manual_search = false;
-                });
+                },function(err) {
+                    messageHandler(err);
+                    user.is_performing_manual_search = false;
+                }).catch((err) => { oops(user_id,err)});
 
             }
         } else if(user.is_performing_manual_search) {
-            bot.sendMessage(user_id,`Sorry, I haven't found any recent additions!\n\nI only display items that have been added within 7 days, so make sure you check Mandarake anyways! https://order.mandarake.co.jp/}`).then(function() {
+            bot.sendMessage(user_id,`Sorry, I haven't found any recent additions!\n\nI only display items that have been added within 7 days, so make sure you check Mandarake anyways! https://order.mandarake.co.jp/`).then(function() {
                 user.is_performing_manual_search = false;
-            });
+            },messageHandler);
 
         }
 
-    },function(error){Promise.reject(error)}).catch(function(error){oops(user_id,error)});
+    },function(error){ oops(user_id,error)}).catch((error)=>oops(user_id,error));
 }
 
 function getPagination( current, maxpage ) {
@@ -655,13 +663,43 @@ function main() {
 
 function oops(id,err) {
     bot.sendMessage(id,`Oops! Something bad happened. Inform the developers about this error:\n\n<pre>${err.stack}</pre>`,{parse_mode:"HTML"}).catch((e) => {
-        console.error(`[CRITICAL]: Could not send oops message (${e.message})\nPrinting error message...\n`)
+        console.error(`[OOPS]: Could not send oops message (${e.message})\nPrinting error message...\n`)
         console.error(err.stack);
         bot.sendMessage(id,"Oops! Something bad happened and we don't know exactly what.\nThe developers have been notified about this issue!").catch((error) => {
-            console.error(`[CRITICAL]: Could not send oops fallback message.\nReason: ${error.message})`)
+            if(errorChecker(error,403)) {
+                console.error(`[CRITICAL]: Could not send oops fallback message.\nReason: ${error.message}\nCode: ${error.code}`)
+            }
         });
     });
 }
+
+// ERROR HANDLERS
+
+function errorChecker(error,...errorCodes) {
+    var result = false;
+    for(code in errorCodes) {
+        result = result || error.response.statusCode == errorCodes[code];
+        if(result) {
+            break;
+        }
+    }
+    return !result;
+}
+
+function messageHandler(err) {
+    if(errorChecker(err,403)) {
+        console.error(err.stack);
+    }
+}
+
+function photoHandler(err) {
+    var check = errorChecker(err,403);
+    if(check) {
+        console.error(err.stack);
+    }
+}
+
+// MAIN
 
 const MAIN_INTERVAL = 600000;
 
