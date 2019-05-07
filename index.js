@@ -460,7 +460,7 @@ bot.on('callback_query',function(callbackQuery) {
             var user = users[opts.chat_id]
             user.search_results.entries.splice(index,1);
             user.search_results.count--;
-            user.blacklist.push(productNumber[0]);
+            user.blacklist.push(productNumber);
             saveUsersList();
             bot.sendMessage(opts.chat_id,"You blacklisted this item! It will not appear in any more searches.");
             var editOptions = Object.assign(getPagination(index+1, user.search_results.count), opts);
