@@ -456,7 +456,7 @@ bot.on('callback_query',function(callbackQuery) {
     if(/blacklist/.test(action)) {
         try {
             var index = parseInt(action.slice(9)-1);
-            var productNumber = users[opts.chat_id].search_results.entries[index].itemNo;
+            var productNumber = users[opts.chat_id].search_results.entries[index].title;
             var user = users[opts.chat_id]
             user.search_results.entries.splice(index,1);
             user.search_results.count--;
@@ -499,7 +499,7 @@ function searchTask(user_id,task_index) {
         if(user.blacklist!=undefined&&user.blacklist.length>0) {
             for(var entry in items.entries) {
                 for(var black in user.blacklist) {
-                    if(items.entries[entry].itemNo[0] === user.blacklist[black]) {
+                    if(items.entries[entry].title[0] === user.blacklist[black]) {
                         items.entries.splice(entry,1);
                         items.entryCount--;
                     }
@@ -548,7 +548,7 @@ function searchBulk(user_id) {
                 results.entries = results.entries.concat(items.entries);
                 var obj = {};
                 for ( var i=0, len=results.entries.length; i < len; i++ )
-                    obj[results.entries[i]['itemNo']] = results.entries[i];
+                    obj[results.entries[i]['title']] = results.entries[i];
 
                 results.entries = new Array();
                 for ( var key in obj )
@@ -563,7 +563,7 @@ function searchBulk(user_id) {
             if(user.blacklist!=undefined&&user.blacklist.length>0) {
                 for(var entry in results.entries) {
                     for(var black in user.blacklist) {
-                        if(results.entries[entry].itemNo[0] === user.blacklist[black]) {
+                        if(results.entries[entry].title[0] === user.blacklist[black]) {
                             results.entries.splice(entry,1);
                             results.count--;
                         }
