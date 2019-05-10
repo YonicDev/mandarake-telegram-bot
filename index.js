@@ -505,7 +505,7 @@ function searchTask(user_id,task_index) {
         if(user.blacklist!=undefined&&user.blacklist.length>0) {
             for(var entry in items.entries) {
                 for(var black in user.blacklist) {
-                    if(items.entries[entry].title === user.blacklist[black]) {
+                    if(items.entries[entry]!=undefined && items.entries[entry].title === user.blacklist[black]) {
                         items.entries.splice(entry,1);
                         items.entryCount--;
                     }
@@ -528,7 +528,7 @@ function searchTask(user_id,task_index) {
                 user.is_performing_manual_search = false;
             },messageHandler).catch(function(err) {oops(user_id,err)});
         }
-    },(error)=> {Promise.reject(error)});
+    },(error)=> {Promise.reject(error)}).catch((error) => oops(user_id,error));
 }
 
 function searchBulk(user_id) {
@@ -569,7 +569,7 @@ function searchBulk(user_id) {
             if(user.blacklist!=undefined&&user.blacklist.length>0) {
                 for(var entry in results.entries) {
                     for(var black in user.blacklist) {
-                        if(results.entries[entry].title === user.blacklist[black]) {
+                        if(items.entries[entry]!=undefined && results.entries[entry].title === user.blacklist[black]) {
                             results.entries.splice(entry,1);
                             results.count--;
                         }
