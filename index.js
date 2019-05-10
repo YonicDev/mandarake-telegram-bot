@@ -569,7 +569,7 @@ function searchBulk(user_id) {
             if(user.blacklist!=undefined&&user.blacklist.length>0) {
                 for(var entry in results.entries) {
                     for(var black in user.blacklist) {
-                        if(items.entries[entry]!=undefined && results.entries[entry].title === user.blacklist[black]) {
+                        if(results.entries[entry]!=undefined && results.entries[entry].title === user.blacklist[black]) {
                             results.entries.splice(entry,1);
                             results.count--;
                         }
