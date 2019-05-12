@@ -208,9 +208,14 @@ bot.onText(/\/search ?(\d|all)?/,function(message,matches) {
                         remove_keyboard:true
                     }
                 };
-                bot.sendMessage(message.from.id,`Performing task #${matches[1]}`,options).then(function() {
-                    searchTask(message.from.id,parseInt(matches[1]));
-                },messageHandler).catch(function(error) { oops(message.from.id,error) });
+                var taskIndex = parseInt(matches[1]);
+                if(taskIndex >= 0 && taskIndex < users[message.from.id].tasks.length) {
+                    bot.sendMessage(message.from.id,`Performing task #${matches[1]}`,options).then(function() {
+                        searchTask(message.from.id,taskIndex);
+                    },messageHandler).catch(function(error) { oops(message.from.id,error) });
+                } else {
+                    bot.sendMessage(message.from.id,`Please, enter a valid task number. (0${users[message.from.id].tasks.length>1?`-${users[message.from.id].tasks.length-1}`:` is the only task`})`,options).catch(messageHandler)
+                }
             } else {
                 var i,j,chunk = 4; //TODO: Make chunk variable?
                 var buttons = [];
