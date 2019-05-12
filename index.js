@@ -479,6 +479,22 @@ bot.on('callback_query',function(callbackQuery) {
                         photoHandler(err);
                     }
                 });
+            } else if(user.search_results.count > 0 && user.search_results.entries.length > 0) {
+                entry = user.search_results.entries[index-1];
+                var image = {
+                    type:"photo",
+                    media:entry.image,
+                    caption: `${entry.title!=undefined?"<b>Title</b>: "+entry.title:"<i>The title could not be displayed.</i>"}\n<b>Shop</b>: ${entry.shop!=undefined?entry.shop:"Unavailable"}\n<b>Price</b>:${entry.price!=undefined?entry.price+"\u00A5":"Unavailable"}\n${entry.isAdult!=undefined?(entry.isAdult?"<b>This is an R-18 doujinshi.</b>":"This is not an adult doujinshi."):"Could not obtain information of age rating. Be careful when ordering!"}\n\n${entry.isStorefront!=undefined?(entry.isStorefront?"<b>This is a storefront item. Be careful when ordering!</b>\n\n":""):"Could not obtain information of item's storefront availability."}<b>Link</b>: ${entry.link!=undefined?entry.link:"Cannot be provided!"}`,
+                    parse_mode:"HTML"
+                };
+                editOptions = Object.assign(getPagination(index, user.search_results.count-1), opts);
+                bot.editMessageMedia(image, editOptions).then(()=> {bot.answerCallbackQuery(callbackQuery.id)},(err) => {
+                    if (msg.caption == removeHTML(image.caption))
+                        bot.answerCallbackQuery(callbackQuery.id);
+                    else {
+                        photoHandler(err);
+                    }
+                });
             } else {
                 var message = callbackQuery.message
                 bot.deleteMessage(message.chat.id,message.message_id).catch((e)=>console.error(e.stack));
