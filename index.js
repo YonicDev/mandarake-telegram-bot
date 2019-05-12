@@ -549,7 +549,7 @@ function searchTask(user_id,task_index) {
                 user.is_performing_manual_search = false;
             },messageHandler).catch(function(err) {oops(user_id,err)});
         }
-    },(error)=> {Promise.reject(error)}).catch((error) => oops(user_id,error));
+    },(error)=> {oops(user_id,error)}).catch((error) => oops(user_id,error));
 }
 
 function searchBulk(user_id) {
